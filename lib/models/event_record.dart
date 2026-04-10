@@ -1,15 +1,26 @@
 // Domain models for events (API-backed).
 
 class ApprovedPhoto {
-  const ApprovedPhoto({required this.id, required this.imageUrl});
+  const ApprovedPhoto({
+    required this.id,
+    required this.imageUrl,
+    this.caption,
+    this.uploadedAt,
+  });
 
   final String id;
   final String imageUrl;
+  final String? caption;
+  final DateTime? uploadedAt;
 
   factory ApprovedPhoto.fromJson(Map<String, dynamic> j) {
     return ApprovedPhoto(
       id: j['id'] as String,
       imageUrl: j['imageUrl'] as String,
+      caption: j['caption'] as String?,
+      uploadedAt: j['uploadedAt'] != null
+          ? DateTime.tryParse(j['uploadedAt'] as String)
+          : null,
     );
   }
 }
@@ -47,6 +58,7 @@ class EventRecord {
     required this.joinSlug,
     this.startsAt,
     this.venue,
+    this.eventType,
     this.description = '',
     this.moderationEnabled = true,
     List<ApprovedPhoto>? approvedPhotos,
@@ -60,6 +72,8 @@ class EventRecord {
   String title;
   DateTime? startsAt;
   String? venue;
+  /// e.g. Wedding, Birthday — from preset list in the editor.
+  String? eventType;
   String description;
   bool moderationEnabled;
   final String joinSlug;
@@ -104,6 +118,7 @@ class EventRecord {
       joinSlug: j['joinSlug'] as String,
       startsAt: j['startsAt'] != null ? DateTime.parse(j['startsAt'] as String) : null,
       venue: j['venue'] as String?,
+      eventType: j['eventType'] as String?,
       description: j['description'] as String? ?? '',
       moderationEnabled: j['moderationEnabled'] as bool? ?? true,
       approvedPhotos: approved,

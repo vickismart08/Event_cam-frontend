@@ -47,6 +47,13 @@ class EventCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(dateStr, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          if (event.eventType != null && event.eventType!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              event.eventType!,
+              style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ],
           if (event.venue != null && event.venue!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(event.venue!, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),

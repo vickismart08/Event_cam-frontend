@@ -49,6 +49,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
   String? _loadedTitle;
   String? _loadedDateLabel;
   String? _loadedWelcome;
+  String? _loadedEventType;
   var _loadingMeta = false;
   var _loadError = false;
 
@@ -85,6 +86,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
         _loadedDateLabel = _formatEventDate(d);
       }
       _loadedWelcome = raw['description'] as String?;
+      _loadedEventType = raw['eventType'] as String?;
     } catch (_) {
       _loadError = true;
     } finally {
@@ -191,6 +193,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
     final title = _loadedTitle ?? widget.eventTitle;
     final dateLabel = _loadedDateLabel ?? widget.eventDateLabel;
     final welcome = _loadedWelcome ?? widget.welcomeMessage;
+    final eventType = _loadedEventType;
 
     return Scaffold(
       appBar: AppBar(
@@ -209,6 +212,18 @@ class _EventUploadPageState extends State<EventUploadPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(dateLabel, style: TextStyle(color: AppColors.textSecondary)),
+              ),
+            if (eventType != null && eventType.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  eventType,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
               ),
             if (welcome != null && welcome.isNotEmpty)
               Padding(
@@ -231,39 +246,17 @@ class _EventUploadPageState extends State<EventUploadPage> {
               ),
             ),
             const SizedBox(height: 20),
-            DropTarget(
-              onDragEntered: (_) => setState(() => _dragging = true),
-              onDragExited: (_) => setState(() => _dragging = false),
-              onDragDone: (d) {
-                setState(() => _dragging = false);
-                _onDrop(d);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _dragging ? AppColors.primary : AppColors.border,
-                    width: 2,
+            kIsWeb
+                ? _buildUploadBox()
+                : DropTarget(
+                    onDragEntered: (_) => setState(() => _dragging = true),
+                    onDragExited: (_) => setState(() => _dragging = false),
+                    onDragDone: (d) {
+                      setState(() => _dragging = false);
+                      _onDrop(d);
+                    },
+                    child: _buildUploadBox(),
                   ),
-                  color: _dragging ? AppColors.primary.withValues(alpha: 0.05) : AppColors.surface,
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.cloud_upload_outlined, size: 40),
-                    const SizedBox(height: 8),
-                    const Text('Drop photos here or pick files'),
-                    const SizedBox(height: 12),
-                    SecondaryOutlinedButton(
-                      label: 'Choose files',
-                      icon: Icons.folder_open,
-                      onPressed: _pickFiles,
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             if (_previews.isNotEmpty)
               SizedBox(
@@ -315,6 +308,36 @@ class _EventUploadPageState extends State<EventUploadPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildUploadBox() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _dragging ? AppColors.primary : AppColors.border,
+          width: 2,
+        ),
+        color: _dragging ? AppColors.primary.withValues(alpha: 0.05) : AppColors.surface,
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.cloud_upload_outlined, size: 40),
+          const SizedBox(height: 8),
+          Text(
+            kIsWeb ? 'Pick photos to upload' : 'Drop photos here or pick files',
+          ),
+          const SizedBox(height: 12),
+          SecondaryOutlinedButton(
+            label: 'Choose files',
+            icon: Icons.folder_open,
+            onPressed: _pickFiles,
+          ),
+        ],
       ),
     );
   }

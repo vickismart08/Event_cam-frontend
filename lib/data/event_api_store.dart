@@ -73,6 +73,7 @@ class EventApiStore extends ChangeNotifier {
     required String title,
     DateTime? startsAt,
     String? venue,
+    String? eventType,
     String description = '',
     bool moderationEnabled = true,
   }) async {
@@ -80,6 +81,7 @@ class EventApiStore extends ChangeNotifier {
       'title': title,
       if (startsAt != null) 'startsAt': startsAt.toIso8601String(),
       if (venue != null && venue.isNotEmpty) 'venue': venue,
+      if (eventType != null && eventType.isNotEmpty) 'eventType': eventType,
       'description': description,
       'moderationEnabled': moderationEnabled,
     }) as Map<String, dynamic>;

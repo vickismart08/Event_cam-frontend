@@ -12,11 +12,11 @@ class ResponsiveContainer extends StatelessWidget {
   final double maxWidth;
   final EdgeInsetsGeometry padding;
 
+  /// Album-style grid: 4 columns when there is room; fewer on narrow phones.
   static int galleryCrossAxisCount(double width) {
-    if (width >= 1100) return 4;
-    if (width >= 800) return 3;
-    if (width >= 520) return 2;
-    return 1;
+    if (width < 340) return 2;
+    if (width < 420) return 3;
+    return 4;
   }
 
   @override

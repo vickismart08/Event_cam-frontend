@@ -5,6 +5,7 @@ import '../config/app_links.dart';
 import '../data/event_api_store.dart';
 import '../models/event_record.dart';
 import '../theme/app_colors.dart';
+import '../utils/download_image_service.dart';
 import '../widgets/app_buttons.dart';
 import '../widgets/copy_link_field.dart';
 import '../widgets/event_gallery_grid.dart';
@@ -142,6 +143,16 @@ class _OverviewTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(event.title, style: Theme.of(context).textTheme.titleLarge),
+                if (event.eventType != null && event.eventType!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    event.eventType!,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
                 if (event.description.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(event.description, style: TextStyle(color: AppColors.textSecondary)),
@@ -157,10 +168,65 @@ class _OverviewTab extends StatelessWidget {
   }
 }
 
-class _GalleryTab extends StatelessWidget {
+class _GalleryTab extends StatefulWidget {
   const _GalleryTab({required this.event});
 
   final EventRecord event;
+
+  @override
+  State<_GalleryTab> createState() => _GalleryTabState();
+}
+
+class _GalleryTabState extends State<_GalleryTab> {
+  final Set<String> _selected = <String>{};
+  var _selectionMode = false;
+  var _downloading = false;
+
+  void _toggleSelected(ApprovedPhoto photo) {
+    setState(() {
+      if (_selected.contains(photo.id)) {
+        _selected.remove(photo.id);
+      } else {
+        _selected.add(photo.id);
+      }
+    });
+  }
+
+  Future<void> _downloadAll() async {
+    await _downloadPhotos(widget.event.approvedPhotos, zipName: '${widget.event.joinSlug}_all.zip');
+  }
+
+  Future<void> _downloadSelected() async {
+    final chosen = widget.event.approvedPhotos.where((p) => _selected.contains(p.id)).toList();
+    if (chosen.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select photos first.')),
+      );
+      return;
+    }
+    await _downloadPhotos(chosen, zipName: '${widget.event.joinSlug}_selected.zip');
+  }
+
+  Future<void> _downloadPhotos(List<ApprovedPhoto> photos, {String? zipName}) async {
+    if (_downloading) return;
+    setState(() => _downloading = true);
+    final outcome = await downloadImageService.downloadMany(
+      photos,
+      eventTitle: widget.event.title,
+      zipName: zipName,
+    );
+    if (!mounted) return;
+    setState(() => _downloading = false);
+    final messenger = ScaffoldMessenger.of(context);
+    if (outcome.successCount > 0) {
+      final suffix = outcome.allSucceeded ? '' : ' (${outcome.successCount}/${outcome.requestedCount})';
+      messenger.showSnackBar(SnackBar(content: Text('Download started$suffix.')));
+      return;
+    }
+    messenger.showSnackBar(
+      SnackBar(content: Text(outcome.message ?? 'Download failed.')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +236,47 @@ class _GalleryTab extends StatelessWidget {
         children: [
           Text('Gallery', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
-          EventGalleryGrid(photos: event.approvedPhotos),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.tonalIcon(
+                onPressed: _downloading ? null : _downloadAll,
+                icon: _downloading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.download_rounded),
+                label: const Text('Download all'),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: _downloading
+                    ? null
+                    : () => setState(() {
+                          _selectionMode = !_selectionMode;
+                          if (!_selectionMode) _selected.clear();
+                        }),
+                icon: Icon(_selectionMode ? Icons.close_rounded : Icons.checklist_rounded),
+                label: Text(_selectionMode ? 'Cancel selection' : 'Select photos'),
+              ),
+              if (_selectionMode)
+                FilledButton.tonalIcon(
+                  onPressed: _downloading ? null : _downloadSelected,
+                  icon: const Icon(Icons.download_for_offline_rounded),
+                  label: Text('Download selected (${_selected.length})'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          EventGalleryGrid(
+            photos: widget.event.approvedPhotos,
+            eventTitle: widget.event.title,
+            selectionMode: _selectionMode,
+            selectedPhotoIds: _selected,
+            onToggleSelection: _toggleSelected,
+          ),
         ],
       ),
     );

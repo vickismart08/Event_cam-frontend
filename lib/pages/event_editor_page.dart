@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
 import '../config/api_config.dart';
+import '../config/event_types.dart';
 import '../data/event_api_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_buttons.dart';
@@ -29,6 +30,7 @@ class _EventEditorPageState extends State<EventEditorPage> {
   DateTime? _startsAt;
   var _moderation = true;
   var _loading = false;
+  String? _eventType;
 
   @override
   void initState() {
@@ -42,6 +44,7 @@ class _EventEditorPageState extends State<EventEditorPage> {
         _description.text = e.description;
         _startsAt = e.startsAt;
         _moderation = e.moderationEnabled;
+        _eventType = e.eventType;
       }
     }
   }
@@ -78,6 +81,7 @@ class _EventEditorPageState extends State<EventEditorPage> {
           title: _title.text,
           startsAt: _startsAt,
           venue: _venue.text,
+          eventType: _eventType,
           description: _description.text,
           moderationEnabled: _moderation,
         );
@@ -101,6 +105,7 @@ class _EventEditorPageState extends State<EventEditorPage> {
         'description': _description.text.trim(),
         'moderationEnabled': _moderation,
         'venue': _venue.text.trim().isEmpty ? null : _venue.text.trim(),
+        'eventType': _eventType,
         'startsAt': _startsAt?.toIso8601String(),
       });
 
@@ -184,7 +189,44 @@ class _EventEditorPageState extends State<EventEditorPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Event type',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Scroll sideways to choose a category.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 44,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: kEventTypeOptions.length,
+                        separatorBuilder: (_, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, i) {
+                          final type = kEventTypeOptions[i];
+                          final selected = _eventType == type;
+                          return ChoiceChip(
+                            label: Text(type),
+                            selected: selected,
+                            showCheckmark: false,
+                            onSelected: (_) => setState(() => _eventType = type),
+                          );
+                        },
+                      ),
+                    ),
+                    if (_eventType != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: _loading ? null : () => setState(() => _eventType = null),
+                          child: const Text('Clear type'),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: TextButton.icon(
