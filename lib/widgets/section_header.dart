@@ -16,13 +16,13 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: AppColors.of(context).textPrimary,
                 fontWeight: FontWeight.w700,
               ),
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 6),
-          Text(subtitle!, style: TextStyle(color: AppColors.textSecondary, height: 1.4)),
+          Text(subtitle!, style: TextStyle(color: AppColors.of(context).textSecondary, height: 1.4)),
         ],
       ],
     );

@@ -1,4 +1,4 @@
-/// Base URL for the Event Camshot API (Express + Firebase Admin).
+/// Base URL for the Glamora API (Express + Firebase Admin).
 ///
 /// Production (Render): `https://event-cam-backend.onrender.com`
 ///

@@ -5,15 +5,19 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
 import 'auth/auth_controller.dart';
+import 'pricing/pricing_region_controller.dart';
 import 'firebase_options.dart';
 import 'pages/event_upload_page.dart';
 import 'pages/guest_join_page.dart';
 import 'pages/guest_qr_scan_page.dart';
 import 'pages/host_dashboard_page.dart';
 import 'pages/landing_page.dart';
+import 'pages/forgot_password_page.dart';
 import 'pages/login_page.dart';
 import 'pages/sign_up_page.dart';
+import 'config/app_brand.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +34,12 @@ Future<void> main() async {
       'Firebase init failed. Run: flutterfire configure\n$e\n$stack',
     );
   }
-  runApp(const EventCamshotApp());
+  try {
+    await themeController.load();
+  } catch (_) {}
+  runApp(const GlamoraApp());
+  // IP-based country for NGN vs USD pricing (non-blocking).
+  pricingRegionController.detect();
 }
 
 final GoRouter _router = GoRouter(
@@ -46,6 +55,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/signup',
       builder: (context, state) => const SignUpPage(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordPage(),
     ),
     GoRoute(
       path: '/host',
@@ -69,16 +82,23 @@ final GoRouter _router = GoRouter(
   ],
 );
 
-class EventCamshotApp extends StatelessWidget {
-  const EventCamshotApp({super.key});
+class GlamoraApp extends StatelessWidget {
+  const GlamoraApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Event Camshot',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      routerConfig: _router,
+    return ListenableBuilder(
+      listenable: Listenable.merge([pricingRegionController, themeController]),
+      builder: (context, _) {
+        return MaterialApp.router(
+          title: AppBrand.displayName,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: themeController.mode,
+          routerConfig: _router,
+        );
+      },
     );
   }
 }

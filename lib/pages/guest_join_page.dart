@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../utils/guest_link_parser.dart';
 import '../widgets/app_buttons.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
 
@@ -46,7 +47,7 @@ class _GuestJoinPageState extends State<GuestJoinPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
         ),
-        title: const Text('Join a gallery'),
+        title: const GlamoraAppBarTitle(title: 'Join a gallery'),
       ),
       body: ResponsiveContainer(
         maxWidth: 520,
@@ -78,7 +79,7 @@ class _GuestJoinPageState extends State<GuestJoinPage> {
                     const SizedBox(height: 6),
                     Text(
                       'Example: https://yoursite.com/e/summer-wedding-2026',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textSecondary),
                     ),
                     const SizedBox(height: 14),
                     TextField(
@@ -112,12 +113,12 @@ class _GuestJoinPageState extends State<GuestJoinPage> {
               const SizedBox(height: 28),
               Row(
                 children: [
-                  Expanded(child: Divider(color: AppColors.border.withValues(alpha: 0.9))),
+                  Expanded(child: Divider(color: AppColors.of(context).border.withValues(alpha: 0.9))),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Text('or', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                    child: Text('or', style: TextStyle(color: AppColors.of(context).textSecondary, fontWeight: FontWeight.w600)),
                   ),
-                  Expanded(child: Divider(color: AppColors.border.withValues(alpha: 0.9))),
+                  Expanded(child: Divider(color: AppColors.of(context).border.withValues(alpha: 0.9))),
                 ],
               ),
               const SizedBox(height: 28),
@@ -132,7 +133,7 @@ class _GuestJoinPageState extends State<GuestJoinPage> {
                 'Point your camera at the QR on the invitation or signage. '
                 'On some browsers you may need to paste the link instead.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.35),
+                style: TextStyle(fontSize: 12, color: AppColors.of(context).textSecondary, height: 1.35),
               ),
             ],
           ),

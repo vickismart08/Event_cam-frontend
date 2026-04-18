@@ -8,6 +8,7 @@ import '../data/event_api_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_buttons.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
 import 'event_hub_page.dart';
@@ -154,7 +155,7 @@ class _EventEditorPageState extends State<EventEditorPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(isEdit ? 'Edit event' : 'New event'),
+        title: GlamoraAppBarTitle(title: isEdit ? 'Edit event' : 'New event'),
       ),
       body: ResponsiveContainer(
         maxWidth: 560,

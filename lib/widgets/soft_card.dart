@@ -19,11 +19,12 @@ class SoftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final decoration = BoxDecoration(
-      color: AppColors.surface,
+      color: colors.surface,
       borderRadius: BorderRadius.circular(radius),
       boxShadow: AppShadows.card(),
-      border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+      border: Border.all(color: colors.border.withValues(alpha: 0.5)),
     );
 
     if (onTap != null) {

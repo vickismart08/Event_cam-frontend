@@ -4,8 +4,10 @@ import '../auth/auth_controller.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_buttons.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
+import 'forgot_password_page.dart';
 import 'host_dashboard_page.dart';
 import 'sign_up_page.dart';
 
@@ -72,7 +74,9 @@ class _LoginPageState extends State<LoginPage> {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign in')),
+      appBar: AppBar(
+        title: const GlamoraAppBarTitle(title: 'Sign in'),
+      ),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
@@ -126,7 +130,22 @@ class _LoginPageState extends State<LoginPage> {
                                 onFieldSubmitted: (_) => _submit(),
                                 validator: _passwordValidator,
                               ),
-                              const SizedBox(height: 28),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: _loading
+                                      ? null
+                                      : () {
+                                          Navigator.of(context).push<void>(
+                                            MaterialPageRoute<void>(
+                                              builder: (_) => const ForgotPasswordPage(),
+                                            ),
+                                          );
+                                        },
+                                  child: const Text('Forgot password?'),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
                               PrimaryAppButton(
                                 label: _loading ? 'Signing in…' : 'Sign in',
                                 onPressed: _loading ? null : _submit,

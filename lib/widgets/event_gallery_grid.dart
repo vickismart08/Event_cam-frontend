@@ -44,9 +44,11 @@ class EventGalleryGrid extends StatelessWidget {
     final count = crossAxisCount ?? ResponsiveContainer.galleryCrossAxisCount(w);
 
     if (photos.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
-        child: Text('No photos yet.', style: TextStyle(color: AppColors.textSecondary)),
+      return Builder(
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text('No photos yet.', style: TextStyle(color: AppColors.of(context).textSecondary)),
+        ),
       );
     }
 
@@ -65,7 +67,7 @@ class EventGalleryGrid extends StatelessWidget {
         final photo = photos[i];
         final url = photo.imageUrl;
         return Material(
-          color: AppColors.border.withValues(alpha: 0.35),
+          color: AppColors.of(context).border.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(10),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -98,8 +100,8 @@ class EventGalleryGrid extends StatelessWidget {
                     );
                   },
                   errorBuilder: (context, error, stackTrace) => Container(
-                    color: AppColors.border,
-                    child: const Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
+                    color: AppColors.of(context).border,
+                    child: Icon(Icons.broken_image_outlined, color: AppColors.of(context).textSecondary),
                   ),
                 ),
                 // Tap affordance (gallery-style overlay)

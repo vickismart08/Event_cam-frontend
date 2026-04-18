@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../config/app_brand.dart';
 import '../theme/app_colors.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../utils/guest_link_parser.dart';
 
 /// Opens the device camera to read a guest gallery QR (payload is guest URL or slug).
@@ -38,8 +40,8 @@ class _GuestQrScanPageState extends State<GuestQrScanPage> {
     if (slug == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('This QR is not a valid Event Camshot guest link.'),
+          SnackBar(
+            content: Text('This QR is not a valid ${AppBrand.displayName} guest link.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -67,7 +69,7 @@ class _GuestQrScanPageState extends State<GuestQrScanPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Scan guest QR'),
+        title: const GlamoraAppBarTitle(title: 'Scan guest QR'),
       ),
       body: kIsWeb
           ? _WebPasteFallback(onSubmit: _tryNavigate)

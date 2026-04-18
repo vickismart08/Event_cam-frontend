@@ -4,6 +4,7 @@ import '../auth/auth_controller.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_buttons.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
 import 'host_dashboard_page.dart';
@@ -74,7 +75,9 @@ class _SignUpPageState extends State<SignUpPage> {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(
+        title: const GlamoraAppBarTitle(title: 'Create account'),
+      ),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(

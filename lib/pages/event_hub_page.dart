@@ -10,6 +10,7 @@ import '../widgets/app_buttons.dart';
 import '../widgets/copy_link_field.dart';
 import '../widgets/event_gallery_grid.dart';
 import '../widgets/guest_qr_card.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
 import 'event_editor_page.dart';
@@ -82,7 +83,7 @@ class _EventHubPageState extends State<EventHubPage> with SingleTickerProviderSt
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: GlamoraAppBarTitle(title: e.title),
             actions: [
               IconButton(
                 tooltip: 'Edit event',
@@ -295,55 +296,220 @@ class _ReviewTab extends StatelessWidget {
       return const Center(child: Text('Nothing to review.'));
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: pending.length,
       itemBuilder: (context, i) {
         final p = pending[i];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    p.imageUrl,
-                    height: 160,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const SizedBox(height: 100, child: Icon(Icons.broken_image)),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+        return _ReviewTile(eventId: event.id, upload: p);
+      },
+    );
+  }
+}
+
+class _ReviewTile extends StatefulWidget {
+  const _ReviewTile({required this.eventId, required this.upload});
+
+  final String eventId;
+  final PendingUpload upload;
+
+  @override
+  State<_ReviewTile> createState() => _ReviewTileState();
+}
+
+class _ReviewTileState extends State<_ReviewTile> {
+  var _busy = false;
+
+  Future<void> _approve() async {
+    setState(() => _busy = true);
+    try {
+      await eventApiStore.approvePending(widget.eventId, widget.upload.id);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _reject() async {
+    setState(() => _busy = true);
+    try {
+      await eventApiStore.rejectPending(widget.eventId, widget.upload.id);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _viewFullScreen() {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _FullScreenImageDialog(imageUrl: widget.upload.imageUrl),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.upload;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Tappable thumbnail
+            GestureDetector(
+              onTap: _viewFullScreen,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
                   children: [
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () async {
-                          await eventApiStore.approvePending(event.id, p.id);
-                        },
-                        child: const Text('Approve'),
+                    Image.network(
+                      p.imageUrl,
+                      width: 76,
+                      height: 76,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, e, _) => const SizedBox(
+                        width: 76,
+                        height: 76,
+                        child: Icon(Icons.broken_image, size: 28),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          await eventApiStore.rejectPending(event.id, p.id);
-                        },
-                        child: const Text('Reject'),
+                    Positioned(
+                      right: 4,
+                      bottom: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Icon(Icons.zoom_in_rounded, color: Colors.white, size: 14),
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(width: 12),
+            // Name + caption
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (p.guestName != null && p.guestName!.isNotEmpty)
+                    Text(
+                      p.guestName!,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  else
+                    Text(
+                      'Guest',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  if (p.caption != null && p.caption!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      p.caption!,
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Accept / Decline buttons
+            if (_busy)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FilledButton.icon(
+                    onPressed: _approve,
+                    icon: const Icon(Icons.check_rounded, size: 16),
+                    label: const Text('Accept'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green.shade600,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(90, 36),
+                      textStyle: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  OutlinedButton.icon(
+                    onPressed: _reject,
+                    icon: const Icon(Icons.close_rounded, size: 16),
+                    label: const Text('Decline'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red.shade600,
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(90, 36),
+                      textStyle: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FullScreenImageDialog extends StatelessWidget {
+  const _FullScreenImageDialog({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      child: Dialog.fullscreen(
+        backgroundColor: Colors.black87,
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, e, _) => const Icon(
+                    Icons.broken_image,
+                    color: Colors.white54,
+                    size: 64,
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: IconButton(
+                    icon: const Icon(Icons.close_rounded, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

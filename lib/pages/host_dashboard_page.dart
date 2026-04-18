@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import '../auth/auth_controller.dart';
 import '../data/event_api_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/theme_controller.dart';
 import '../widgets/app_buttons.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/event_card.dart';
 import '../widgets/responsive_container.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/section_header.dart';
 import 'event_editor_page.dart';
 import 'event_hub_page.dart';
 import 'landing_page.dart';
 import 'login_page.dart';
+import 'qr_generator_page.dart';
 
 class HostDashboardPage extends StatefulWidget {
   const HostDashboardPage({super.key});
@@ -48,12 +51,33 @@ class _HostDashboardPageState extends State<HostDashboardPage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Your events'),
+            title: const GlamoraAppBarTitle(title: 'Your events'),
             actions: [
+              ListenableBuilder(
+                listenable: themeController,
+                builder: (context, _) => IconButton(
+                  tooltip: themeController.isDark ? 'Light mode' : 'Dark mode',
+                  icon: Icon(
+                    themeController.isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  ),
+                  onPressed: themeController.toggle,
+                ),
+              ),
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const QrGeneratorPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.qr_code_rounded, size: 18),
+                label: const Text('QR code'),
               ),
               TextButton(
                 onPressed: () async {

@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import '../api/api_client.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_buttons.dart';
+import '../widgets/glamora_brand_assets.dart';
 import '../widgets/responsive_container.dart';
 import '../widgets/soft_card.dart';
 
@@ -185,7 +186,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
 
     if (widget.slug != null && _loadError) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Event')),
+        appBar: AppBar(title: const GlamoraAppBarTitle(title: 'Event')),
         body: const Center(child: Text('Event not found or API unavailable.')),
       );
     }
@@ -201,7 +202,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
           icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(title.isEmpty ? 'Upload photos' : title),
+        title: GlamoraAppBarTitle(title: title.isEmpty ? 'Upload photos' : title),
       ),
       body: ResponsiveContainer(
         maxWidth: 560,
@@ -211,7 +212,7 @@ class _EventUploadPageState extends State<EventUploadPage> {
             if (dateLabel != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(dateLabel, style: TextStyle(color: AppColors.textSecondary)),
+                child: Text(dateLabel, style: TextStyle(color: AppColors.of(context).textSecondary)),
               ),
             if (eventType != null && eventType.isNotEmpty)
               Padding(
@@ -319,10 +320,10 @@ class _EventUploadPageState extends State<EventUploadPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _dragging ? AppColors.primary : AppColors.border,
+          color: _dragging ? AppColors.primary : AppColors.of(context).border,
           width: 2,
         ),
-        color: _dragging ? AppColors.primary.withValues(alpha: 0.05) : AppColors.surface,
+        color: _dragging ? AppColors.primary.withValues(alpha: 0.05) : AppColors.of(context).surface,
       ),
       child: Column(
         children: [
